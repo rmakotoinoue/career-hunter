@@ -1,0 +1,9 @@
+<Project>
+  <Import Project="../Directory.Build.props" />
+
+  <PropertyGroup>
+    <!-- xUnit1051: tests exercise use cases synchronously; propagating a cancellation token
+         to every call adds noise without making these short tests more responsive. -->
+    <NoWarn>$(NoWarn);xUnit1051</NoWarn>
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,112 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: careerhunter-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-careerhunter}
+      POSTGRES_USER: ${POSTGRES_USER:-careerhunter}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD no arquivo .env}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - careerhunter-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - careerhunter-net
+
+  api:
+    build:
+      context: .
+      dockerfile: src/CareerHunter.Api/Dockerfile
+    container_name: careerhunter-api
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+      ConnectionStrings__CareerHunter: Host=postgres;Port=5432;Database=${POSTGRES_DB:-careerhunter};Username=${POSTGRES_USER:-careerhunter};Password=${POSTGRES_PASSWORD}
+      Api__ApiKey: ${API_KEY:-}
+      Ai__BaseUrl: ${AI_BASE_URL:-https://api.openai.com/v1/}
+      Ai__ApiKey: ${AI_API_KEY:-}
+      Ai__Model: ${AI_MODEL:-gpt-4o-mini}
+      Email__Host: ${SMTP_HOST:-}
+      Email__Port: ${SMTP_PORT:-587}
+      Email__UseStartTls: ${SMTP_USE_STARTTLS:-true}
+      Email__UserName: ${SMTP_USER:-}
+      Email__Password: ${SMTP_PASSWORD:-}
+      Email__FromAddress: ${SMTP_FROM:-}
+      JobProviders__Adzuna__AppId: ${ADZUNA_APP_ID:-}
+      JobProviders__Adzuna__AppKey: ${ADZUNA_APP_KEY:-}
+      JobProviders__Jooble__ApiKey: ${JOOBLE_API_KEY:-}
+    ports:
+      # Loopback only: the API holds candidate data and spends the AI key. Put a reverse proxy with
+      # authentication in front of it before publishing it on a public interface.
+      - "127.0.0.1:5080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - careerhunter-net
+
+  worker:
+    build:
+      context: .
+      dockerfile: src/CareerHunter.Worker/Dockerfile
+    container_name: careerhunter-worker
+    restart: unless-stopped
+    environment:
+      DOTNET_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+      ConnectionStrings__CareerHunter: Host=postgres;Port=5432;Database=${POSTGRES_DB:-careerhunter};Username=${POSTGRES_USER:-careerhunter};Password=${POSTGRES_PASSWORD}
+      Worker__CycleIntervalMinutes: ${WORKER_CYCLE_MINUTES:-30}
+      Ai__BaseUrl: ${AI_BASE_URL:-https://api.openai.com/v1/}
+      Ai__ApiKey: ${AI_API_KEY:-}
+      Ai__Model: ${AI_MODEL:-gpt-4o-mini}
+      Email__Host: ${SMTP_HOST:-}
+      Email__Port: ${SMTP_PORT:-587}
+      Email__UseStartTls: ${SMTP_USE_STARTTLS:-true}
+      Email__UserName: ${SMTP_USER:-}
+      Email__Password: ${SMTP_PASSWORD:-}
+      Email__FromAddress: ${SMTP_FROM:-}
+      JobProviders__Adzuna__AppId: ${ADZUNA_APP_ID:-}
+      JobProviders__Adzuna__AppKey: ${ADZUNA_APP_KEY:-}
+      JobProviders__Jooble__ApiKey: ${JOOBLE_API_KEY:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - careerhunter-net
+
+  # Optional database UI. Never starts with the default stack:
+  #   docker compose --profile tools up -d pgadmin
+  pgadmin:
+    image: dpage/pgadmin4:9
+    container_name: careerhunter-pgadmin
+    profiles: ["tools"]
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@local.dev}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+      PGADMIN_REPLACE_SERVERS_ON_STARTUP: "True"
+    ports:
+      # Loopback only: this UI can read every row of the candidate profile.
+      - "127.0.0.1:5050:80"
+    volumes:
+      - careerhunter-pgadmin-data:/var/lib/pgadmin
+      - ./infra/pgadmin/servers.json:/pgadmin4/servers.json:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - careerhunter-net
+
+volumes:
+  careerhunter-postgres-data:
+  careerhunter-pgadmin-data:
+
+networks:
+  careerhunter-net:
+    driver: bridge

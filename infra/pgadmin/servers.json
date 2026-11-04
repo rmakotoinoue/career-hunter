@@ -1,0 +1,13 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "Career Hunter (local)",
+      "Group": "Servers",
+      "Host": "postgres",
+      "Port": 5432,
+      "MaintenanceDB": "careerhunter",
+      "Username": "careerhunter",
+      "SSLMode": "prefer"
+    }
+  }
+}

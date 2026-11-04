@@ -1,0 +1,48 @@
+# ---------------------------------------------------------------------------
+# Credenciais e configuração local — NUNCA vão para o GitHub.
+# Os valores reais ficam só na sua máquina (.env e
+# appsettings.Development.json). Para o repositório existem os modelos
+# .env.example e appsettings.Development.example.json, com placeholders.
+# ---------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+
+# Configuração de desenvolvimento (senha do Postgres, SMTP, Adzuna, Jooble).
+appsettings.Development.json
+appsettings.*.Local.json
+appsettings.Local.json
+secrets.json
+*.pfx
+*.p12
+*.key
+
+# ---------------------------------------------------------------------------
+# Build
+# ---------------------------------------------------------------------------
+**/bin/
+**/obj/
+**/node_modules/
+**/dist/
+**/.angular/
+publish/
+*.user
+*.suo
+
+# ---------------------------------------------------------------------------
+# Ferramentas e editores
+# ---------------------------------------------------------------------------
+.vs/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# ---------------------------------------------------------------------------
+# Logs e artefatos locais
+# ---------------------------------------------------------------------------
+*.log
+logs/
+TestResults/
+coverage/
+*.trx
