@@ -238,7 +238,9 @@ Status atual: build 0 warnings / 0 erros; 24 testes aprovados (12 Domain, 10 App
 
 ## 7. Endpoints (resumo)
 
-`docs/delivery-report.md` traz a lista completa. Principais grupos:
+A documentação completa com **todos os corpos de request/response e cURLs prontos** está em
+[`docs/api-endpoints.md`](docs/api-endpoints.md) (lista de rotas validada por execução real em
+05/11/2026). Principais grupos:
 
 - `GET/POST /api/candidates`, `.../skills`, `.../experiences`, `.../educations`,
   `.../certifications`, `.../career-targets`, `.../preferences`

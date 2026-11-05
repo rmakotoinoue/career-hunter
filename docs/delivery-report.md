@@ -461,6 +461,13 @@ Open findings (not fixed; documented as debt or accepted risk):
 8. **Observability.** Structured logs and health endpoints exist; no metrics, tracing or alerting.
 9. **Backup/restore and retention.** Compose uses a named volume; no automated backup or purge of
    old raw records/evaluations.
+10. **Candidate-owned records have no foreign key to the profile.** `job_evaluations`,
+    `job_applications`, `daily_digests`, `job_sources` and `notification_preferences` carry
+    `candidate_profile_id` as a plain Guid; only the `candidate_*` tables actually cascade. Deleting
+    a profile with direct SQL therefore orphans its evaluations, applications, sources, preference
+    and digests (confirmed on 05/11/2026 while cleaning the scratch profile used to validate
+    `docs/api-endpoints.md`). The API exposes no `DELETE /api/candidates/{id}`, so this only happens
+    manually today — a future delete endpoint must cascade or refuse while records exist.
 
 ## 11. Next steps
 
