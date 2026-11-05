@@ -233,8 +233,9 @@ dotnet build CareerHunter.sln
 dotnet test CareerHunter.sln
 ```
 
-Status atual: build 0 warnings / 0 erros; 24 testes aprovados (12 Domain, 10 Application,
-2 de integração com repositórios, queries, EF Core e pipeline completo em SQLite).
+Status atual: build 0 warnings / 0 erros; **43 testes aprovados** (16 Domain, 10 Application,
+17 de infraestrutura com repositórios, queries, EF Core e pipeline completo em SQLite) e mais
+**6 testes do dashboard Angular** (vitest).
 
 ## 7. Endpoints (resumo)
 
@@ -242,7 +243,7 @@ A documentação completa com **todos os corpos de request/response e cURLs pron
 [`docs/api-endpoints.md`](docs/api-endpoints.md) (lista de rotas validada por execução real em
 05/11/2026). Há também uma **collection do Postman** pronta para importar:
 [`postman/career-hunter.postman_collection.json`](postman/career-hunter.postman_collection.json)
-— 52 requests em 7 pastas, com `X-Api-Key` via variável `api_key`, `candidate_id` já preenchido
+— 53 requests em 7 pastas, com `X-Api-Key` via variável `api_key`, `candidate_id` já preenchido
 e um teste de status por request. Principais grupos:
 
 - `GET/POST /api/candidates`, `.../skills`, `.../experiences`, `.../educations`,
@@ -254,7 +255,8 @@ e um teste de status por request. Principais grupos:
 - `GET/POST /api/applications`, `PUT /api/applications/{id}/status`,
   `POST /api/applications/{id}/prepare-package`
 - `PUT /api/candidates/{id}/notification-preference`
-- `GET/POST /api/digests`, `POST /api/digests/{id}/send`, `GET /api/digests/{id}/preview`
+- `GET/POST /api/digests`, `POST /api/digests/{id}/send`, `GET /api/digests/{id}/preview`,
+  `GET /api/digests/{id}/items`
 
 A prévia renderiza o e-mail exatamente como ele sairia, sem enviar nada:
 `GET /api/digests/{id}/preview` (HTML), `?format=text` ou `?format=json`.
@@ -262,9 +264,34 @@ A prévia renderiza o e-mail exatamente como ele sairia, sem enviar nada:
 Marcar uma candidatura como `Applied` exige `userConfirmed=true` e não dispara nenhuma ação
 externa; o status apenas registra algo que o candidato já fez manualmente.
 
-## 8. Limitações conhecidas
+## 8. Dashboard (Angular)
 
-- Frontend Angular ainda não foi gerado (Angular CLI indisponível no ambiente de build).
+O app em [`frontend/career-hunter-web`](frontend/career-hunter-web) mostra **as vagas do dia**
+(itens do digest) com a descrição armazenada da vaga, faixa salarial, requisitos detectados,
+filtro por texto e o botão para a inscrição no site original. É o consumidor direto de
+`GET /api/digests/{id}/items`.
+
+```bash
+# 1. API na porta 5080 (a mesma do compose e da documentação)
+$env:ASPNETCORE_URLS='http://localhost:5080'; $env:Api__ApiKey='<chave>'
+dotnet run --project src/CareerHunter.Api --no-launch-profile
+
+# 2. frontend
+cd frontend/career-hunter-web
+cp proxy.conf.example.json proxy.conf.json   # primeira vez: cole a chave em X-Api-Key
+npm install                                   # primeira vez
+npm start                                     # http://localhost:4200
+```
+
+- A chave fica apenas em `proxy.conf.json` (gitignored) — o proxy a injeta no `X-Api-Key`, então
+  **nenhum segredo entra no bundle**.
+- `npm test` roda os 6 testes do dashboard (vitest + `HttpClient` em memória).
+- A interface **não** envia candidatura: o fluxo termina em "Abrir vaga original ↗".
+
+## 9. Limitações conhecidas
+
+- O dashboard roda em modo de desenvolvimento (`ng serve`); servir o build estático a partir da
+  API em produção ainda não foi feito.
 - O daemon Docker foi usado para validar o PostgreSQL e o pgAdmin; as imagens de `api` e `worker`
   ainda não foram construídas nem executadas em container.
 - A coleta suporta apenas `manual` e RSS/Atom públicos; portais com autenticação, CAPTCHA ou

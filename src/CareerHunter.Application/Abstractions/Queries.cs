@@ -88,4 +88,13 @@ public interface IDailyDigestQueries
         Guid? candidateProfileId,
         int take,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Digest items joined with the stored job detail (description, modality, compensation,
+    /// requirements, provenance). Returns null when the digest does not exist so the API can
+    /// answer 404 instead of an empty list.
+    /// </summary>
+    Task<IReadOnlyList<DigestItemDetailDto>?> ListItemsAsync(
+        Guid digestId,
+        CancellationToken cancellationToken = default);
 }

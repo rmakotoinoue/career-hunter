@@ -425,6 +425,16 @@ digests.MapGet("/{id:guid}", async (
         ? Results.Ok(digest)
         : NotFound("DailyDigest"));
 
+// The dashboard reads this instead of calling /api/jobs once per item.
+digests.MapGet("/{id:guid}/items", async (
+    Guid id,
+    IDailyDigestQueries queries,
+    CancellationToken cancellationToken) =>
+    await queries.ListItemsAsync(id, cancellationToken) is { } items
+        ? Results.Ok(items)
+        : NotFound("DailyDigest"))
+    .WithSummary("Digest items joined with the stored job detail (description, modality, compensation, requirements, source).");
+
 digests.MapPost("", async (
     GenerateDailyDigestCommand command,
     GenerateDailyDigestUseCase useCase,

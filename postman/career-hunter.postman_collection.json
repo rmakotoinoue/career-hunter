@@ -1,7 +1,7 @@
 {
     "info":  {
                  "name":  "Career Hunter API",
-                 "description":  "Collection da API do Career Hunter (repositório: github.com/rmakotoinoue/career-hunter).\n\nComo usar:\n1. Abra a collection → aba \"Variáveis\" e preencha api_key (chave do .env / variável API_KEY).\n   base_url já aponta para http://localhost:5000 (execução local com `dotnet run`).\n   Em produção: https://seu-host, ou http://127.0.0.1:5080 via túnel SSH (a porta só escuta em 127.0.0.1).\n2. Preencha job_id, source_id, evaluation_id, application_id e digest_id conforme as respostas.\n   candidate_id já vem com o perfil do Rafael.\n3. Cada teste (aba \"Testes\") valida o código de status documentado em docs/api-endpoints.md.\n\nPolítica: a API NUNCA envia candidatura. O status Applied só registra algo feito manualmente.\nA rota POST /api/digests/{id}/send é a única com efeito externo real (e-mail).",
+                 "description":  "Collection da API do Career Hunter (repositório: github.com/rmakotoinoue/career-hunter).\n\nComo usar:\n1. Abra a collection → aba \"Variáveis\" e preencha api_key (chave do .env / variável API_KEY).\n   base_url já aponta para http://localhost:5080 (porta documentada; a API local roda com ASPNETCORE_URLS=http://localhost:5080).\n   Em produção: https://seu-host, ou http://127.0.0.1:5080 via túnel SSH (a porta só escuta em 127.0.0.1).\n2. Preencha job_id, source_id, evaluation_id, application_id e digest_id conforme as respostas.\n   candidate_id já vem com o perfil do Rafael.\n3. Cada teste (aba \"Testes\") valida o código de status documentado em docs/api-endpoints.md.\n\nPolítica: a API NUNCA envia candidatura. O status Applied só registra algo feito manualmente.\nA rota POST /api/digests/{id}/send é a única com efeito externo real (e-mail).",
                  "schema":  "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
              },
     "auth":  {
@@ -27,9 +27,9 @@
     "variable":  [
                      {
                          "key":  "base_url",
-                         "value":  "http://localhost:5000",
+                         "value":  "http://localhost:5080",
                          "type":  "string",
-                         "description":  "Local: http://localhost:5000 (dotnet run) ou http://127.0.0.1:5080 (compose). Produção: https://seu-host ou túnel SSH."
+                         "description":  "Local: http://localhost:5080 (dotnet run com ASPNETCORE_URLS ou compose). Produção: https://seu-host ou túnel SSH."
                      },
                      {
                          "key":  "api_key",
@@ -2232,6 +2232,42 @@
                                                                            ]
                                                               },
                                                       "description":  "Itens com rank, score, jobTitle, employerName, jobUrl e recommendation."
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP 200\u0027, function () { pm.response.to.have.status(200); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "GET /api/digests/{id}/items",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/digests/{{digest_id}}/items",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "digests",
+                                                                               "{{digest_id}}",
+                                                                               "items"
+                                                                           ]
+                                                              },
+                                                      "description":  "Itens do digest com o detalhe da vaga (description, modality, contractType, seniority, compensation, requirements, sourceName). Endpoint consumido pelo dashboard."
                                                   },
                                       "event":  [
                                                     {

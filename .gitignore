@@ -17,6 +17,9 @@ secrets.json
 *.p12
 *.key
 
+# Proxy do ng serve (injeta o X-Api-Key). Modelo commitado: proxy.conf.example.json.
+frontend/career-hunter-web/proxy.conf.json
+
 # ---------------------------------------------------------------------------
 # Build
 # ---------------------------------------------------------------------------

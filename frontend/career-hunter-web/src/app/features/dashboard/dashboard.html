@@ -1,0 +1,202 @@
+<div class="dashboard">
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo" aria-hidden="true">CH</span>
+      <div class="brand-text">
+        <h1>Vagas do dia</h1>
+        <p class="subtitle">
+          @if (digest(); as current) {
+            {{ formatDate(current.digestDate) }} · {{ current.itemCount }} oportunidade(s) ·
+            {{ statusLabel(current.status) }}
+          } @else {
+            nenhum digest gerado
+          }
+        </p>
+      </div>
+    </div>
+
+    <div class="topbar-actions">
+      <label class="picker">
+        <span>Digest</span>
+        <select
+          [ngModel]="selectedDigestId()"
+          (ngModelChange)="selectDigest($event)"
+          [disabled]="digests().length === 0"
+        >
+          @for (item of digests(); track item.id) {
+            <option [value]="item.id">
+              {{ formatDate(item.digestDate) }} · {{ item.itemCount }} vaga(s) ·
+              {{ statusLabel(item.status) }}
+            </option>
+          }
+        </select>
+      </label>
+
+      <button class="ghost" type="button" (click)="openPreview()" [disabled]="!selectedDigestId()">
+        Prévia do e-mail
+      </button>
+    </div>
+  </header>
+
+  @if (error()) {
+    <div class="banner error" role="alert">
+      {{ error() }}
+      <button type="button" class="link" (click)="loadDigests()">Tentar de novo</button>
+    </div>
+  }
+
+  <main class="layout">
+    <section class="list-pane" aria-label="Oportunidades do dia">
+      <input
+        class="search"
+        type="search"
+        placeholder="Filtrar por título, empresa, local ou descrição…"
+        [ngModel]="query()"
+        (ngModelChange)="query.set($event)"
+      />
+
+      <p class="count">
+        {{ filteredItems().length }} de {{ items().length }} oportunidade(s) no digest
+      </p>
+
+      <ul class="job-list">
+        @for (item of filteredItems(); track item.id) {
+          <li>
+            <button
+              type="button"
+              class="job-card"
+              [class.active]="selectedItem()?.id === item.id"
+              (click)="selectItem(item.id)"
+            >
+              <span class="rank">#{{ item.rank }}</span>
+              <span [class]="scoreClass(item)">{{ item.score }}</span>
+              <span class="card-body">
+                <span class="card-title">{{ item.jobTitle }}</span>
+                <span class="card-employer">{{ item.employerName }}</span>
+                <span class="card-meta">
+                  @if (item.modality) {
+                    <span class="chip">{{ modalityLabel(item.modality) }}</span>
+                  }
+                  @if (item.contractType) {
+                    <span class="chip">{{ contractLabel(item.contractType) }}</span>
+                  }
+                  @if (item.seniority) {
+                    <span class="chip">{{ seniorityLabel(item.seniority) }}</span>
+                  }
+                </span>
+              </span>
+            </button>
+          </li>
+        } @empty {
+          <li class="empty">
+            @if (loading()) {
+              Carregando…
+            } @else if (items().length === 0) {
+              Nenhuma oportunidade atingiu a pontuação mínima configurada neste dia.
+            } @else {
+              Nenhuma oportunidade corresponde ao filtro.
+            }
+          </li>
+        }
+      </ul>
+    </section>
+
+    <section class="detail-pane" aria-label="Detalhe da vaga">
+      @if (selectedItem(); as job) {
+        <article class="job-detail">
+          <header class="detail-head">
+            <span [class]="scoreClass(job) + ' big'">{{ job.score }}</span>
+            <div>
+              <p class="recommendation">{{ recommendationLabel(job.recommendation) }}</p>
+              <h2>{{ job.jobTitle }}</h2>
+              <p class="employer">{{ job.employerName }}</p>
+            </div>
+          </header>
+
+          <dl class="meta-grid">
+            @if (job.location) {
+              <div>
+                <dt>Local</dt>
+                <dd>{{ job.location }}</dd>
+              </div>
+            }
+            @if (job.modality) {
+              <div>
+                <dt>Modelo</dt>
+                <dd>{{ modalityLabel(job.modality) }}</dd>
+              </div>
+            }
+            @if (job.contractType) {
+              <div>
+                <dt>Contrato</dt>
+                <dd>{{ contractLabel(job.contractType) }}</dd>
+              </div>
+            }
+            @if (job.seniority) {
+              <div>
+                <dt>Senioridade</dt>
+                <dd>{{ seniorityLabel(job.seniority) }}</dd>
+              </div>
+            }
+            @if (salary(job); as range) {
+              <div>
+                <dt>Faixa salarial</dt>
+                <dd>{{ range }}</dd>
+              </div>
+            }
+            @if (formatPublishedAt(job.publishedAt); as published) {
+              <div>
+                <dt>Publicada em</dt>
+                <dd>{{ published }}</dd>
+              </div>
+            }
+            @if (job.sourceName) {
+              <div>
+                <dt>Fonte</dt>
+                <dd>{{ job.sourceName }}</dd>
+              </div>
+            }
+          </dl>
+
+          <section class="description">
+            <h3>Descrição da vaga</h3>
+            <div class="description-body">
+              {{ job.description || 'Sem descrição armazenada para esta vaga.' }}
+            </div>
+          </section>
+
+          @if (job.requirements.length > 0) {
+            <section class="requirements">
+              <h3>Requisitos detectados ({{ job.requirements.length }})</h3>
+              <ul>
+                @for (requirement of job.requirements; track requirement.name) {
+                  <li [class.optional]="!requirement.isRequired">
+                    {{ requirement.name }}
+                    <span class="cat">{{ categoryLabel(requirement.category) }}</span>
+                  </li>
+                }
+              </ul>
+            </section>
+          }
+
+          <footer class="actions">
+            <a class="primary" [href]="job.jobUrl" target="_blank" rel="noopener noreferrer">
+              Abrir vaga original ↗
+            </a>
+            <span class="hint">
+              A inscrição acontece no site da empresa — nada é enviado automaticamente.
+            </span>
+          </footer>
+        </article>
+      } @else {
+        <div class="placeholder">
+          @if (loading()) {
+            Carregando as vagas do dia…
+          } @else {
+            Selecione uma vaga na lista ao lado para ver a descrição completa.
+          }
+        </div>
+      }
+    </section>
+  </main>
+</div>

@@ -1,5 +1,7 @@
+using CareerHunter.Application.Catalog;
 using CareerHunter.Domain.Assessment;
 using CareerHunter.Domain.Notifications;
+using CareerHunter.Domain.SharedKernel;
 
 namespace CareerHunter.Application.Notifications;
 
@@ -23,6 +25,31 @@ public sealed record DigestItemDto(
     int Score,
     EvaluationRecommendation Recommendation,
     string JobUrl);
+
+/// <summary>
+/// One digest item joined with the stored job detail, so the dashboard renders a single
+/// request instead of one call per item. Values that were never collected stay null;
+/// they are never invented to fill the UI.
+/// </summary>
+public sealed record DigestItemDetailDto(
+    Guid Id,
+    Guid JobEvaluationId,
+    Guid JobOpportunityId,
+    int Rank,
+    string JobTitle,
+    string EmployerName,
+    int Score,
+    EvaluationRecommendation Recommendation,
+    string JobUrl,
+    string Location,
+    WorkModality? Modality,
+    EmploymentContractType? ContractType,
+    SeniorityLevel? Seniority,
+    JobCompensationDto? Compensation,
+    string Description,
+    DateTimeOffset? PublishedAt,
+    string? SourceName,
+    IReadOnlyList<JobRequirementDto> Requirements);
 
 public sealed record NotificationDeliveryDto(
     Guid Id,

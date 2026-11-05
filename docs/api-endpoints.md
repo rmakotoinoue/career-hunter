@@ -21,7 +21,7 @@ curl -s "$API_URL/api/jobs?pageSize=2" -H "X-Api-Key: $API_KEY"
 ```
 
 **Prefere Postman?** Importe [`postman/career-hunter.postman_collection.json`](../postman/career-hunter.postman_collection.json)
-(File → Import): 52 requests em 7 pastas, na mesma ordem deste documento. A collection declara
+(File → Import): 53 requests em 7 pastas, na mesma ordem deste documento. A collection declara
 `api_key` e as demais variáveis (`candidate_id` já vem preenchido com o perfil do Rafael;
 `job_id`, `source_id`, `evaluation_id`, `application_id` e `digest_id` você cola conforme as
 respostas). Cada request tem na aba **Testes** a asserção do código de status documentado aqui.
@@ -122,6 +122,7 @@ Os três primeiros e o `409` foram reproduzidos; `422` e `503` vêm do handler d
 | POST | `/api/applications/{id}/prepare-package` | Gera pacote de candidatura |
 | GET | `/api/digests` | Lista digests (`candidateProfileId`, `take`) |
 | GET | `/api/digests/{id}` | Detalhe do digest com itens |
+| GET | `/api/digests/{id}/items` | Itens do digest **com o detalhe da vaga** (descrição, modalidade, salário, requisitos, fonte) |
 | POST | `/api/digests` | Gera o digest do dia (idempotente) |
 | POST | `/api/digests/{id}/send` | **Envia o e-mail de verdade** |
 | GET | `/api/digests/{id}/preview` | Prévia do e-mail (`format=json\|text\|html`) |
@@ -458,6 +459,15 @@ curl -s "$API_URL/api/digests?candidateProfileId=$CANDIDATE_ID&take=10" -H "X-Ap
 
 curl -s "$API_URL/api/digests/$DIGEST_ID" -H "X-Api-Key: $API_KEY"
 # 200 itens com rank, score, jobTitle, employerName, jobUrl, recommendation
+
+# itens com o detalhe da vaga (é o que o dashboard consome, em uma chamada só)
+curl -s "$API_URL/api/digests/$DIGEST_ID/items" -H "X-Api-Key: $API_KEY"
+# 200 [{...,"location":"São Paulo, SP","modality":"Remote","contractType":"Clt",
+#       "seniority":"Senior","compensation":{"minAmount":10000,...,"isEstimated":false},
+#       "description":"...","publishedAt":"...","sourceName":"Adzuna BR - .NET Sao Paulo",
+#       "requirements":[{"name":".NET","category":"Technology","isRequired":true}]}]
+# Campos que a fonte não trouxe vêm null (modality, compensation, publishedAt...).
+# Digest inexistente -> 404; digest sem itens -> 200 [].
 ```
 
 ### Prévia do e-mail (não envia)
