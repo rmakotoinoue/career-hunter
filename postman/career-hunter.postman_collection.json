@@ -1,0 +1,2423 @@
+{
+    "info":  {
+                 "name":  "Career Hunter API",
+                 "description":  "Collection da API do Career Hunter (repositório: github.com/rmakotoinoue/career-hunter).\n\nComo usar:\n1. Abra a collection → aba \"Variáveis\" e preencha api_key (chave do .env / variável API_KEY).\n   base_url já aponta para http://localhost:5000 (execução local com `dotnet run`).\n   Em produção: https://seu-host, ou http://127.0.0.1:5080 via túnel SSH (a porta só escuta em 127.0.0.1).\n2. Preencha job_id, source_id, evaluation_id, application_id e digest_id conforme as respostas.\n   candidate_id já vem com o perfil do Rafael.\n3. Cada teste (aba \"Testes\") valida o código de status documentado em docs/api-endpoints.md.\n\nPolítica: a API NUNCA envia candidatura. O status Applied só registra algo feito manualmente.\nA rota POST /api/digests/{id}/send é a única com efeito externo real (e-mail).",
+                 "schema":  "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+             },
+    "auth":  {
+                 "type":  "apikey",
+                 "apikey":  [
+                                {
+                                    "key":  "key",
+                                    "value":  "X-Api-Key",
+                                    "type":  "string"
+                                },
+                                {
+                                    "key":  "value",
+                                    "value":  "{{api_key}}",
+                                    "type":  "string"
+                                },
+                                {
+                                    "key":  "in",
+                                    "value":  "header",
+                                    "type":  "string"
+                                }
+                            ]
+             },
+    "variable":  [
+                     {
+                         "key":  "base_url",
+                         "value":  "http://localhost:5000",
+                         "type":  "string",
+                         "description":  "Local: http://localhost:5000 (dotnet run) ou http://127.0.0.1:5080 (compose). Produção: https://seu-host ou túnel SSH."
+                     },
+                     {
+                         "key":  "api_key",
+                         "value":  "",
+                         "type":  "string",
+                         "description":  "Cole a chave da variável API_KEY / Api:ApiKey. Nunca versione este valor."
+                     },
+                     {
+                         "key":  "candidate_id",
+                         "value":  "65bb1795-9e94-424f-9715-ab5e1d8aaee2",
+                         "type":  "string",
+                         "description":  "Perfil do Rafael (GET /api/candidates)."
+                     },
+                     {
+                         "key":  "source_id",
+                         "value":  "",
+                         "type":  "string",
+                         "description":  "Id de uma fonte — cole a partir de GET /api/job-sources."
+                     },
+                     {
+                         "key":  "job_id",
+                         "value":  "",
+                         "type":  "string",
+                         "description":  "Id de uma vaga — cole a partir de GET /api/jobs."
+                     },
+                     {
+                         "key":  "skill_id",
+                         "value":  "",
+                         "type":  "string",
+                         "description":  "Id de uma skill — cole a partir do POST /api/candidates/{id}/skills."
+                     },
+                     {
+                         "key":  "target_id",
+                         "value":  "",
+                         "type":  "string",
+                         "description":  "Id de um cargo-alvo — cole a partir do POST .../career-targets."
+                     },
+                     {
+                         "key":  "evaluation_id",
+                         "value":  "",
+                         "type":  "string",
+                         "description":  "Id de uma avaliação — cole a partir do POST /api/evaluations."
+                     },
+                     {
+                         "key":  "application_id",
+                         "value":  "",
+                         "type":  "string",
+                         "description":  "Id de uma candidatura — cole a partir do POST /api/applications."
+                     },
+                     {
+                         "key":  "digest_id",
+                         "value":  "",
+                         "type":  "string",
+                         "description":  "Id de um digest — cole a partir do POST /api/digests."
+                     }
+                 ],
+    "item":  [
+                 {
+                     "name":  "00 · Saúde e autenticação",
+                     "item":  [
+                                  {
+                                      "name":  "GET / — identificação e política",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+
+                                                                           ]
+                                                              },
+                                                      "description":  "Rotas abertas não exigem X-Api-Key.",
+                                                      "auth":  {
+                                                                   "type":  "noauth"
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP 200\u0027, function () { pm.response.to.have.status(200); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "GET /health",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/health",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "health"
+                                                                           ]
+                                                              },
+                                                      "description":  "Liveness do processo.",
+                                                      "auth":  {
+                                                                   "type":  "noauth"
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP 200\u0027, function () { pm.response.to.have.status(200); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "GET /health/database",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/health/database",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "health",
+                                                                               "database"
+                                                                           ]
+                                                              },
+                                                      "description":  "Readiness do PostgreSQL. 503 se o banco estiver fora.",
+                                                      "auth":  {
+                                                                   "type":  "noauth"
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP 200\u0027, function () { pm.response.to.have.status(200); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "GET /api/jobs SEM chave (espera 401)",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/jobs?pageSize=1",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "jobs"
+                                                                           ],
+                                                                  "query":  [
+                                                                                {
+                                                                                    "key":  "pageSize",
+                                                                                    "value":  "1"
+                                                                                }
+                                                                            ]
+                                                              },
+                                                      "description":  "Demonstra a proteção: sem o header X-Api-Key a resposta é ProblemDetails 401.",
+                                                      "auth":  {
+                                                                   "type":  "noauth"
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP 401\u0027, function () { pm.response.to.have.status(401); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "01 · Candidato",
+                     "item":  [
+                                  {
+                                      "name":  "GET /api/candidates",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/candidates",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "candidates"
+                                                                           ]
+                                                              },
+                                                      "description":  "Lista perfis."
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP 200\u0027, function () { pm.response.to.have.status(200); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "GET /api/candidates/{id}",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/candidates/{{candidate_id}}",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "candidates",
+                                                                               "{{candidate_id}}"
+                                                                           ]
+                                                              },
+                                                      "description":  "Detalhe com skills, experiências, formações e cargos-alvo."
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP 200\u0027, function () { pm.response.to.have.status(200); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "POST /api/candidates",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json",
+                                                                         "type":  "text"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/candidates",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "candidates"
+                                                                           ]
+                                                              },
+                                                      "description":  "ATENÇÃO: cria um perfil novo no banco. Responde 201 {\"id\":\"...\"}.",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"fullName\": \"Rafael Makoto Inoue\",\n  \"email\": \"rmakotoinoue@gmail.com\",\n  \"headline\": \"Tech Lead | Engenheiro de Software Sênior | .NET, Azure e AWS\",\n  \"summary\": \"19 anos de tecnologia, liderança técnica e modernização de legado.\",\n  \"city\": \"Mongaguá\", \"state\": \"SP\", \"country\": \"Brazil\",\n  \"yearsOfExperience\": 19,\n  \"linkedinUrl\": \"https://linkedin.com/in/rafael-makoto-inoue\",\n  \"acceptsRemote\": true, \"acceptsHybrid\": true, \"acceptsOnsite\": false,\n  \"acceptsClt\": true, \"acceptsPj\": true,\n  \"expectedMinAmount\": 9000, \"expectedMaxAmount\": 12000,\n  \"expectedPeriod\": \"Monthly\", \"expectedCurrency\": \"BRL\"\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP 201\u0027, function () { pm.response.to.have.status(201); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "PUT /api/candidates/{id}",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json",
+                                                                         "type":  "text"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/candidates/{{candidate_id}}",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "candidates",
+                                                                               "{{candidate_id}}"
+                                                                           ]
+                                                              },
+                                                      "description":  "Atualiza dados do perfil. 204 sem corpo.",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"fullName\": \"Rafael Makoto Inoue\",\n  \"headline\": \"Tech Lead | Engenheiro de Software Sênior | .NET, Azure e AWS\",\n  \"summary\": null,\n  \"city\": \"Mongaguá\", \"state\": \"SP\", \"country\": \"Brazil\",\n  \"yearsOfExperience\": 19,\n  \"linkedinUrl\": null\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP 204\u0027, function () { pm.response.to.have.status(204); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "PUT /api/candidates/{id}/preferences",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json",
+                                                                         "type":  "text"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/candidates/{{candidate_id}}/preferences",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "candidates",
+                                                                               "{{candidate_id}}",
+                                                                               "preferences"
+                                                                           ]
+                                                              },
+                                                      "description":  "Preferências de trabalho + expectativa salarial (alimenta o filtro de vagas e o score).",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"candidateProfileId\": \"{{candidate_id}}\",\n  \"acceptsRemote\": true, \"acceptsHybrid\": true, \"acceptsOnsite\": false,\n  \"acceptsClt\": true, \"acceptsPj\": true,\n  \"expectedMinAmount\": 9000, \"expectedMaxAmount\": 12000,\n  \"expectedPeriod\": \"Monthly\", \"expectedCurrency\": \"BRL\",\n  \"clearCompensationExpectation\": false\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP 204\u0027, function () { pm.response.to.have.status(204); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "POST /api/candidates/{id}/experiences",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json",
+                                                                         "type":  "text"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/candidates/{{candidate_id}}/experiences",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "candidates",
+                                                                               "{{candidate_id}}",
+                                                                               "experiences"
+                                                                           ]
+                                                              },
+                                                      "description":  "Adiciona experiência.",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"candidateProfileId\": \"{{candidate_id}}\",\n  \"employer\": \"Ília\",\n  \"title\": \"Tech Lead\",\n  \"startDate\": \"2025-12-01\",\n  \"endDate\": null,\n  \"description\": \"Modernização de legado para Azure.\",\n  \"technologies\": [\"C#\", \".NET\", \"Azure\"]\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP 201\u0027, function () { pm.response.to.have.status(201); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "POST /api/candidates/{id}/skills",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json",
+                                                                         "type":  "text"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/candidates/{{candidate_id}}/skills",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "candidates",
+                                                                               "{{candidate_id}}",
+                                                                               "skills"
+                                                                           ]
+                                                              },
+                                                      "description":  "category: Technical|Behavioral|Language|Tool|Domain. Anote o id retornado em {{skill_id}}.",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"candidateProfileId\": \"{{candidate_id}}\",\n  \"name\": \"C#\",\n  \"category\": \"Technical\",\n  \"proficiency\": 5,\n  \"yearsOfExperience\": 15\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP 201\u0027, function () { pm.response.to.have.status(201); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "DELETE /api/candidates/{id}/skills/{skillId}",
+                                      "request":  {
+                                                      "method":  "DELETE",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/candidates/{{candidate_id}}/skills/{{skill_id}}",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "candidates",
+                                                                               "{{candidate_id}}",
+                                                                               "skills",
+                                                                               "{{skill_id}}"
+                                                                           ]
+                                                              },
+                                                      "description":  "Preencha {{skill_id}} com o id devolvido pelo POST acima."
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP 204\u0027, function () { pm.response.to.have.status(204); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "POST /api/candidates/{id}/educations",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json",
+                                                                         "type":  "text"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/candidates/{{candidate_id}}/educations",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "candidates",
+                                                                               "{{candidate_id}}",
+                                                                               "educations"
+                                                                           ]
+                                                              },
+                                                      "description":  "Adiciona formação.",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"candidateProfileId\": \"{{candidate_id}}\",\n  \"institution\": \"FIAP\",\n  \"degree\": \"Pós-graduação\",\n  \"fieldOfStudy\": \"Data Analytics\",\n  \"startDate\": \"2023-01-01\",\n  \"endDate\": \"2024-12-31\"\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP 201\u0027, function () { pm.response.to.have.status(201); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "POST /api/candidates/{id}/certifications",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json",
+                                                                         "type":  "text"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/candidates/{{candidate_id}}/certifications",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "candidates",
+                                                                               "{{candidate_id}}",
+                                                                               "certifications"
+                                                                           ]
+                                                              },
+                                                      "description":  "Adiciona certificação.",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"candidateProfileId\": \"{{candidate_id}}\",\n  \"name\": \"Azure Fundamentals\",\n  \"issuer\": \"Microsoft\",\n  \"issuedOn\": \"2024-01-15\",\n  \"expiresOn\": null,\n  \"credentialUrl\": null\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP 201\u0027, function () { pm.response.to.have.status(201); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "POST /api/candidates/{id}/career-targets",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json",
+                                                                         "type":  "text"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/candidates/{{candidate_id}}/career-targets",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "candidates",
+                                                                               "{{candidate_id}}",
+                                                                               "career-targets"
+                                                                           ]
+                                                              },
+                                                      "description":  "seniority: Intern|Junior|MidLevel|Senior|Lead|Principal|Architect. Anote o id em {{target_id}}.",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"candidateProfileId\": \"{{candidate_id}}\",\n  \"jobTitle\": \"Tech Lead\",\n  \"seniority\": \"Lead\",\n  \"isPrimary\": true,\n  \"notes\": null\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP 201\u0027, function () { pm.response.to.have.status(201); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "PUT .../career-targets/{targetId}/primary",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json",
+                                                                         "type":  "text"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/candidates/{{candidate_id}}/career-targets/{{target_id}}/primary",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "candidates",
+                                                                               "{{candidate_id}}",
+                                                                               "career-targets",
+                                                                               "{{target_id}}",
+                                                                               "primary"
+                                                                           ]
+                                                              },
+                                                      "description":  "Marca o alvo como primário (o primário vem primeiro na busca dinâmica).",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{ }",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP 204\u0027, function () { pm.response.to.have.status(204); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "PUT /api/candidates/{id}/notification-preference",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json",
+                                                                         "type":  "text"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/candidates/{{candidate_id}}/notification-preference",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "candidates",
+                                                                               "{{candidate_id}}",
+                                                                               "notification-preference"
+                                                                           ]
+                                                              },
+                                                      "description":  "E-mail, hora local, fuso e score mínimo do digest. 200 com {\"id\":\"...\"}.",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"candidateProfileId\": \"{{candidate_id}}\",\n  \"email\": \"rmakotoinoue@gmail.com\",\n  \"isEnabled\": true,\n  \"sendHourLocal\": 8,\n  \"timeZoneId\": \"America/Sao_Paulo\",\n  \"minimumScore\": 55\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP 200\u0027, function () { pm.response.to.have.status(200); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "02 · Descoberta (fontes, coleta, registros)",
+                     "item":  [
+                                  {
+                                      "name":  "GET /api/job-sources",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/job-sources",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "job-sources"
+                                                                           ]
+                                                              },
+                                                      "description":  "Fontes com status da última coleta. Anote um id em {{source_id}}."
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP 200\u0027, function () { pm.response.to.have.status(200); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "POST /api/job-sources",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json",
+                                                                         "type":  "text"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/job-sources",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "job-sources"
+                                                                           ]
+                                                              },
+                                                      "description":  "ATENÇÃO: cria uma fonte nova. kind: Manual|Rss|Api|HtmlPage|Adzuna|Jooble|Greenhouse|Lever. candidateProfileId null = fonte compartilhada.",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"name\": \"Greenhouse - Minha Empresa\",\n  \"baseUrl\": \"https://boards-api.greenhouse.io/v1/boards/minhaempresa/jobs?content=true\",\n  \"kind\": \"Greenhouse\",\n  \"accessPolicyNotes\": \"API pública do board, sem chave e sem scraping.\",\n  \"minimumIntervalMinutes\": 720,\n  \"candidateProfileId\": \"{{candidate_id}}\"\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP 201\u0027, function () { pm.response.to.have.status(201); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "PUT /api/job-sources/{id}/enabled (pausar)",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json",
+                                                                         "type":  "text"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/job-sources/{{source_id}}/enabled",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "job-sources",
+                                                                               "{{source_id}}",
+                                                                               "enabled"
+                                                                           ]
+                                                              },
+                                                      "description":  "Pausa a fonte (o worker ignora fontes desabilitadas).",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{ \"enabled\": false }",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP 204\u0027, function () { pm.response.to.have.status(204); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "PUT /api/job-sources/{id}/enabled (reativar)",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json",
+                                                                         "type":  "text"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/job-sources/{{source_id}}/enabled",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "job-sources",
+                                                                               "{{source_id}}",
+                                                                               "enabled"
+                                                                           ]
+                                                              },
+                                                      "description":  "Reativa a fonte.",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{ \"enabled\": true }",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP 204\u0027, function () { pm.response.to.have.status(204); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "POST /api/job-sources/collect (candidato inteiro)",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/job-sources/collect?candidateProfileId={{candidate_id}}\u0026force=true",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "job-sources",
+                                                                               "collect"
+                                                                           ],
+                                                                  "query":  [
+                                                                                {
+                                                                                    "key":  "candidateProfileId",
+                                                                                    "value":  "{{candidate_id}}"
+                                                                                },
+                                                                                {
+                                                                                    "key":  "force",
+                                                                                    "value":  "true"
+                                                                                }
+                                                                            ]
+                                                              },
+                                                      "description":  "Coleta em todas as fontes ativas do candidato, ignorando o intervalo mínimo. 200 com [{collectionRunId, status, recordsCollected, ...}]."
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP 200\u0027, function () { pm.response.to.have.status(200); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "POST /api/job-sources/collect (uma fonte)",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/job-sources/collect?sourceId={{source_id}}\u0026force=true",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "job-sources",
+                                                                               "collect"
+                                                                           ],
+                                                                  "query":  [
+                                                                                {
+                                                                                    "key":  "sourceId",
+                                                                                    "value":  "{{source_id}}"
+                                                                                },
+                                                                                {
+                                                                                    "key":  "force",
+                                                                                    "value":  "true"
+                                                                                }
+                                                                            ]
+                                                              },
+                                                      "description":  "Coleta só na fonte indicada. Os parâmetros são mutuamente opcionais; force=true pula o intervalo."
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP 200\u0027, function () { pm.response.to.have.status(200); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "GET /api/job-sources/runs",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/job-sources/runs?take=5",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "job-sources",
+                                                                               "runs"
+                                                                           ],
+                                                                  "query":  [
+                                                                                {
+                                                                                    "key":  "take",
+                                                                                    "value":  "5"
+                                                                                }
+                                                                            ]
+                                                              },
+                                                      "description":  "Histórico de execuções (Succeeded|Failed|Skipped)."
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP 200\u0027, function () { pm.response.to.have.status(200); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "GET /api/job-sources/records",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/job-sources/records?take=10\u0026status=Collected",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "job-sources",
+                                                                               "records"
+                                                                           ],
+                                                                  "query":  [
+                                                                                {
+                                                                                    "key":  "take",
+                                                                                    "value":  "10"
+                                                                                },
+                                                                                {
+                                                                                    "key":  "status",
+                                                                                    "value":  "Collected"
+                                                                                }
+                                                                            ]
+                                                              },
+                                                      "description":  "Registros brutos. status: Collected|Normalized|Rejected."
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP 200\u0027, function () { pm.response.to.have.status(200); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "POST /api/job-sources/{id}/records (registro manual)",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json",
+                                                                         "type":  "text"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/job-sources/{{source_id}}/records",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "job-sources",
+                                                                               "{{source_id}}",
+                                                                               "records"
+                                                                           ]
+                                                              },
+                                                      "description":  "Para portais sem API: cola o texto original da vaga. NÃO normaliza sozinho — rode /api/catalog/normalize.",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"jobSourceId\": \"{{source_id}}\",\n  \"externalId\": null,\n  \"sourceUrl\": \"https://empresa.gupy.io/job/12345\",\n  \"title\": \"Tech Lead .NET\",\n  \"company\": \"Empresa Ltda\",\n  \"location\": \"São Paulo/SP\",\n  \"description\": \"Cole aqui o texto original da vaga.\",\n  \"publishedAt\": null\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP 201\u0027, function () { pm.response.to.have.status(201); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "03 · Catálogo de vagas",
+                     "item":  [
+                                  {
+                                      "name":  "POST /api/catalog/normalize",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/catalog/normalize?take=100",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "catalog",
+                                                                               "normalize"
+                                                                           ],
+                                                                  "query":  [
+                                                                                {
+                                                                                    "key":  "take",
+                                                                                    "value":  "100"
+                                                                                }
+                                                                            ]
+                                                              },
+                                                      "description":  "Converte registros brutos em vagas. 200 {processed, normalized, rejected, rejectionReasons}."
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP 200\u0027, function () { pm.response.to.have.status(200); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "GET /api/jobs",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/jobs?pageSize=10",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "jobs"
+                                                                           ],
+                                                                  "query":  [
+                                                                                {
+                                                                                    "key":  "pageSize",
+                                                                                    "value":  "10"
+                                                                                }
+                                                                            ]
+                                                              },
+                                                      "description":  "Catálogo paginado {items, page, pageSize, totalCount, totalPages}."
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP 200\u0027, function () { pm.response.to.have.status(200); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "GET /api/jobs (filtros)",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/jobs?query=tech+lead\u0026modality=Remote\u0026contractType=Clt\u0026seniority=Senior\u0026page=1\u0026pageSize=10",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "jobs"
+                                                                           ],
+                                                                  "query":  [
+                                                                                {
+                                                                                    "key":  "query",
+                                                                                    "value":  "tech+lead"
+                                                                                },
+                                                                                {
+                                                                                    "key":  "modality",
+                                                                                    "value":  "Remote"
+                                                                                },
+                                                                                {
+                                                                                    "key":  "contractType",
+                                                                                    "value":  "Clt"
+                                                                                },
+                                                                                {
+                                                                                    "key":  "seniority",
+                                                                                    "value":  "Senior"
+                                                                                },
+                                                                                {
+                                                                                    "key":  "page",
+                                                                                    "value":  "1"
+                                                                                },
+                                                                                {
+                                                                                    "key":  "pageSize",
+                                                                                    "value":  "10"
+                                                                                }
+                                                                            ]
+                                                              },
+                                                      "description":  "modality: Remote|Hybrid|Onsite · contractType: Clt|Pj · seniority: Intern|Junior|MidLevel|Senior|Lead|Principal|Architect. Valores são CASE-SENSITIVE: minúsculas dão 400."
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP 200\u0027, function () { pm.response.to.have.status(200); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "GET /api/jobs/{id}",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/jobs/{{job_id}}",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "jobs",
+                                                                               "{{job_id}}"
+                                                                           ]
+                                                              },
+                                                      "description":  "404 se o id não existe. Preencha {{job_id}} com um id de GET /api/jobs."
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP em [200, 404]\u0027, function () { pm.expect([200, 404]).to.include(pm.response.code); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "GET /api/jobs/{id}/evaluations",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/jobs/{{job_id}}/evaluations",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "jobs",
+                                                                               "{{job_id}}",
+                                                                               "evaluations"
+                                                                           ]
+                                                              },
+                                                      "description":  "Avaliações já feitas para essa vaga."
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP 200\u0027, function () { pm.response.to.have.status(200); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "04 · Avaliação",
+                     "item":  [
+                                  {
+                                      "name":  "POST /api/evaluations",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json",
+                                                                         "type":  "text"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/evaluations",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "evaluations"
+                                                                           ]
+                                                              },
+                                                      "description":  "preference: Auto|RuleBased|Ai · force=false reaproveita a avaliação existente (sem custo de IA). 201 {\"id\":\"...\"}; 400 se o enum for inválido. Anote o id em {{evaluation_id}}.",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"candidateProfileId\": \"{{candidate_id}}\",\n  \"jobOpportunityId\": \"{{job_id}}\",\n  \"preference\": \"RuleBased\",\n  \"force\": false\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP em [201, 400]\u0027, function () { pm.expect([201, 400]).to.include(pm.response.code); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "GET /api/evaluations/{id}",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/evaluations/{{evaluation_id}}",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "evaluations",
+                                                                               "{{evaluation_id}}"
+                                                                           ]
+                                                              },
+                                                      "description":  "overallScore, recommendation, gaps, strengths, dimensions, engine e — na IA — provider/model/promptVersion."
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP 200\u0027, function () { pm.response.to.have.status(200); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "05 · Candidatura (sempre manual)",
+                     "item":  [
+                                  {
+                                      "name":  "GET /api/applications",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/applications",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "applications"
+                                                                           ]
+                                                              },
+                                                      "description":  "Filtros: candidateProfileId, status."
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP 200\u0027, function () { pm.response.to.have.status(200); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "POST /api/applications",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json",
+                                                                         "type":  "text"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/applications",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "applications"
+                                                                           ]
+                                                              },
+                                                      "description":  "Abre a candidatura em Discovered. 201 {\"id\":\"...\"}. Anote em {{application_id}}.",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"candidateProfileId\": \"{{candidate_id}}\",\n  \"jobOpportunityId\": \"{{job_id}}\",\n  \"jobEvaluationId\": \"{{evaluation_id}}\"\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP 201\u0027, function () { pm.response.to.have.status(201); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "GET /api/applications/{id}",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/applications/{{application_id}}",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "applications",
+                                                                               "{{application_id}}"
+                                                                           ]
+                                                              },
+                                                      "description":  "Detalhe com histórico de status, materiais e notas."
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP 200\u0027, function () { pm.response.to.have.status(200); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "POST /api/applications/{id}/materials",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json",
+                                                                         "type":  "text"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/applications/{{application_id}}/materials",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "applications",
+                                                                               "{{application_id}}",
+                                                                               "materials"
+                                                                           ]
+                                                              },
+                                                      "description":  "type: Resume|RecruiterMessage|QuestionAnswer|SalaryExpectation|CoverLetter.",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"applicationId\": \"{{application_id}}\",\n  \"type\": \"RecruiterMessage\",\n  \"title\": \"Mensagem para o recrutador\",\n  \"content\": \"Olá! Vi a vaga e gostaria de conversar sobre a oportunidade.\",\n  \"preparedBy\": \"candidate\",\n  \"modelName\": null\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP 201\u0027, function () { pm.response.to.have.status(201); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "POST /api/applications/{id}/notes",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json",
+                                                                         "type":  "text"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/applications/{{application_id}}/notes",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "applications",
+                                                                               "{{application_id}}",
+                                                                               "notes"
+                                                                           ]
+                                                              },
+                                                      "description":  "Anota algo feito fora do sistema.",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"applicationId\": \"{{application_id}}\",\n  \"text\": \"Nota registrada pelo candidato.\",\n  \"author\": \"candidate\"\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP 201\u0027, function () { pm.response.to.have.status(201); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "PUT /api/applications/{id}/salary-expectation",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json",
+                                                                         "type":  "text"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/applications/{{application_id}}/salary-expectation",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "applications",
+                                                                               "{{application_id}}",
+                                                                               "salary-expectation"
+                                                                           ]
+                                                              },
+                                                      "description":  "Obrigatória antes de marcar Applied (senão 409).",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"applicationId\": \"{{application_id}}\",\n  \"amount\": 11000,\n  \"currency\": \"BRL\"\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP 204\u0027, function () { pm.response.to.have.status(204); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "POST /api/applications/{id}/prepare-package",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json",
+                                                                         "type":  "text"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/applications/{{application_id}}/prepare-package",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "applications",
+                                                                               "{{application_id}}",
+                                                                               "prepare-package"
+                                                                           ]
+                                                              },
+                                                      "description":  "Gera resumo de currículo + mensagem. 200 {materialIds:[...]}.",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{ }",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP 200\u0027, function () { pm.response.to.have.status(200); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "PUT status → Analyzed",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json",
+                                                                         "type":  "text"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/applications/{{application_id}}/status",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "applications",
+                                                                               "{{application_id}}",
+                                                                               "status"
+                                                                           ]
+                                                              },
+                                                      "description":  "200 {\"status\":\"Analyzed\"}. 409 se a candidatura não estiver em Discovered ou não tiver avaliação vinculada.",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"applicationId\": \"{{application_id}}\",\n  \"targetStatus\": \"Analyzed\",\n  \"changedBy\": \"rafael\",\n  \"reason\": null,\n  \"userConfirmed\": false\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP em [200, 409]\u0027, function () { pm.expect([200, 409]).to.include(pm.response.code); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "PUT status → ReadyForReview",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json",
+                                                                         "type":  "text"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/applications/{{application_id}}/status",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "applications",
+                                                                               "{{application_id}}",
+                                                                               "status"
+                                                                           ]
+                                                              },
+                                                      "description":  "Só sai de Analyzed.",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"applicationId\": \"{{application_id}}\",\n  \"targetStatus\": \"ReadyForReview\",\n  \"changedBy\": \"rafael\",\n  \"reason\": null,\n  \"userConfirmed\": false\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP em [200, 409]\u0027, function () { pm.expect([200, 409]).to.include(pm.response.code); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "PUT status → Prepared",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json",
+                                                                         "type":  "text"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/applications/{{application_id}}/status",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "applications",
+                                                                               "{{application_id}}",
+                                                                               "status"
+                                                                           ]
+                                                              },
+                                                      "description":  "Só sai de ReadyForReview.",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"applicationId\": \"{{application_id}}\",\n  \"targetStatus\": \"Prepared\",\n  \"changedBy\": \"rafael\",\n  \"reason\": null,\n  \"userConfirmed\": false\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP em [200, 409]\u0027, function () { pm.expect([200, 409]).to.include(pm.response.code); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "PUT status → Applied SEM confirmação (espera 409)",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json",
+                                                                         "type":  "text"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/applications/{{application_id}}/status",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "applications",
+                                                                               "{{application_id}}",
+                                                                               "status"
+                                                                           ]
+                                                              },
+                                                      "description":  "Regra de segurança: 409 \"Marking an application as Applied requires explicit confirmation by the candidate.\"",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"applicationId\": \"{{application_id}}\",\n  \"targetStatus\": \"Applied\",\n  \"changedBy\": \"rafael\",\n  \"reason\": null,\n  \"userConfirmed\": false\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP 409\u0027, function () { pm.response.to.have.status(409); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "PUT status → Applied COM confirmação",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json",
+                                                                         "type":  "text"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/applications/{{application_id}}/status",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "applications",
+                                                                               "{{application_id}}",
+                                                                               "status"
+                                                                           ]
+                                                              },
+                                                      "description":  "200 {\"status\":\"Applied\"}. 409 se a salary-expectation ainda não tiver sido registrada.",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"applicationId\": \"{{application_id}}\",\n  \"targetStatus\": \"Applied\",\n  \"changedBy\": \"rafael\",\n  \"reason\": null,\n  \"userConfirmed\": true\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP em [200, 409]\u0027, function () { pm.expect([200, 409]).to.include(pm.response.code); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "06 · Digest diário",
+                     "item":  [
+                                  {
+                                      "name":  "POST /api/digests (gerar)",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json",
+                                                                         "type":  "text"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/digests",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "digests"
+                                                                           ]
+                                                              },
+                                                      "description":  "Idempotente por candidato/dia: a segunda chamada devolve alreadyExisted:true com o mesmo digestId. Anote em {{digest_id}}.",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{ \"candidateProfileId\": \"{{candidate_id}}\" }",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP 200\u0027, function () { pm.response.to.have.status(200); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "GET /api/digests",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/digests?candidateProfileId={{candidate_id}}\u0026take=10",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "digests"
+                                                                           ],
+                                                                  "query":  [
+                                                                                {
+                                                                                    "key":  "candidateProfileId",
+                                                                                    "value":  "{{candidate_id}}"
+                                                                                },
+                                                                                {
+                                                                                    "key":  "take",
+                                                                                    "value":  "10"
+                                                                                }
+                                                                            ]
+                                                              },
+                                                      "description":  "Lista digests com itemCount, attemptCount e sentAt."
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP 200\u0027, function () { pm.response.to.have.status(200); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "GET /api/digests/{id}",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/digests/{{digest_id}}",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "digests",
+                                                                               "{{digest_id}}"
+                                                                           ]
+                                                              },
+                                                      "description":  "Itens com rank, score, jobTitle, employerName, jobUrl e recommendation."
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP 200\u0027, function () { pm.response.to.have.status(200); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "GET /api/digests/{id}/preview (json)",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/digests/{{digest_id}}/preview?format=json",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "digests",
+                                                                               "{{digest_id}}",
+                                                                               "preview"
+                                                                           ],
+                                                                  "query":  [
+                                                                                {
+                                                                                    "key":  "format",
+                                                                                    "value":  "json"
+                                                                                }
+                                                                            ]
+                                                              },
+                                                      "description":  "Prévia do e-mail: subject, to, htmlBody, textBody. Não envia nada."
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP 200\u0027, function () { pm.response.to.have.status(200); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "GET /api/digests/{id}/preview (text)",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/digests/{{digest_id}}/preview?format=text",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "digests",
+                                                                               "{{digest_id}}",
+                                                                               "preview"
+                                                                           ],
+                                                                  "query":  [
+                                                                                {
+                                                                                    "key":  "format",
+                                                                                    "value":  "text"
+                                                                                }
+                                                                            ]
+                                                              },
+                                                      "description":  "Prévia em text/plain."
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP 200\u0027, function () { pm.response.to.have.status(200); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "GET /api/digests/{id}/preview (html)",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/digests/{{digest_id}}/preview",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "digests",
+                                                                               "{{digest_id}}",
+                                                                               "preview"
+                                                                           ]
+                                                              },
+                                                      "description":  "Prévia em HTML (abre no visualizador do Postman)."
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP 200\u0027, function () { pm.response.to.have.status(200); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "POST /api/digests/{id}/send 🔴 ENVIA E-MAIL",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json",
+                                                                         "type":  "text"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/digests/{{digest_id}}/send",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "digests",
+                                                                               "{{digest_id}}",
+                                                                               "send"
+                                                                           ]
+                                                              },
+                                                      "description":  "🔴 ENVIA E-MAIL DE VERDADE. Rode somente depois de revisar a prévia. 200 se já foi enviado (idempotente), 409 se a notificação estiver desligada, 404 se o id não existe.",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{ }",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027HTTP em [200, 404, 409]\u0027, function () { pm.expect([200, 404, 409]).to.include(pm.response.code); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "response":  [
+
+                                                   ]
+                                  }
+                              ]
+                 }
+             ]
+}

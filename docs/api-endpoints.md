@@ -20,6 +20,12 @@ export API_KEY="sua-chave"          # mesma do .env (chave API_KEY)
 curl -s "$API_URL/api/jobs?pageSize=2" -H "X-Api-Key: $API_KEY"
 ```
 
+**Prefere Postman?** Importe [`postman/career-hunter.postman_collection.json`](../postman/career-hunter.postman_collection.json)
+(File → Import): 52 requests em 7 pastas, na mesma ordem deste documento. A collection declara
+`api_key` e as demais variáveis (`candidate_id` já vem preenchido com o perfil do Rafael;
+`job_id`, `source_id`, `evaluation_id`, `application_id` e `digest_id` você cola conforme as
+respostas). Cada request tem na aba **Testes** a asserção do código de status documentado aqui.
+
 Regras gerais:
 
 | Item | Comportamento |

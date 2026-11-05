@@ -240,7 +240,10 @@ Status atual: build 0 warnings / 0 erros; 24 testes aprovados (12 Domain, 10 App
 
 A documentação completa com **todos os corpos de request/response e cURLs prontos** está em
 [`docs/api-endpoints.md`](docs/api-endpoints.md) (lista de rotas validada por execução real em
-05/11/2026). Principais grupos:
+05/11/2026). Há também uma **collection do Postman** pronta para importar:
+[`postman/career-hunter.postman_collection.json`](postman/career-hunter.postman_collection.json)
+— 52 requests em 7 pastas, com `X-Api-Key` via variável `api_key`, `candidate_id` já preenchido
+e um teste de status por request. Principais grupos:
 
 - `GET/POST /api/candidates`, `.../skills`, `.../experiences`, `.../educations`,
   `.../certifications`, `.../career-targets`, `.../preferences`
