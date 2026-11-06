@@ -10,6 +10,9 @@ App em [`career-hunter-web/`](career-hunter-web/) (Angular 22, standalone, SCSS,
 ```bash
 # API na porta 5080 (a mesma do compose e da documentação)
 $env:ASPNETCORE_URLS='http://localhost:5080'; $env:Api__ApiKey='<chave>'
+$env:ASPNETCORE_ENVIRONMENT='Development'   # obrigatório: sem o launch profile o padrão é
+                                             # Production, que ignora appsettings.Development.json
+                                             # (é onde ficam connection string e chaves dos provedores)
 dotnet run --project src/CareerHunter.Api --no-launch-profile
 
 # frontend

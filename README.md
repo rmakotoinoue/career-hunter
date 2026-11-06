@@ -274,6 +274,9 @@ filtro por texto e o botão para a inscrição no site original. É o consumidor
 ```bash
 # 1. API na porta 5080 (a mesma do compose e da documentação)
 $env:ASPNETCORE_URLS='http://localhost:5080'; $env:Api__ApiKey='<chave>'
+$env:ASPNETCORE_ENVIRONMENT='Development'   # obrigatório: sem o launch profile o padrão é
+                                             # Production, que ignora appsettings.Development.json
+                                             # (é onde ficam connection string e chaves dos provedores)
 dotnet run --project src/CareerHunter.Api --no-launch-profile
 
 # 2. frontend
